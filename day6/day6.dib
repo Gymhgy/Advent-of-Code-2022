@@ -1,0 +1,19 @@
+#!csharp
+
+using System.IO;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+string input = File.ReadAllText("day6.txt");
+
+#!csharp
+
+for(int i = 0; i < input.Length; i++) {
+    if(input.Substring(i, 4).Distinct().Count() == 4) { Console.Write(i+4);  break;}
+}
+
+#!csharp
+
+for(int i = 0; i < input.Length; i++) {
+    if(input.Substring(i, 14).Distinct().Count() == 14) { Console.Write(i+14);  break;}
+}

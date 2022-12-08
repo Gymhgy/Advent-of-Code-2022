@@ -1,0 +1,76 @@
+#!csharp
+
+using System.IO;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+static List<int> Ints(this string s) {
+    return System.Text.RegularExpressions.Regex.Matches(s, "\\d+").Select(x => int.Parse(x.Value)).ToList();
+}
+string input = File.ReadAllText("day7.txt");
+Func<object,string> f = Microsoft.CodeAnalysis.CSharp.Scripting.Hosting.CSharpObjectFormatter.Instance.FormatObject;
+
+#!csharp
+
+class Dir {
+    public Dir prev;
+    public Dictionary<string, Dir> ch = new Dictionary<string, Dir>();
+    public int size = 0;
+
+    public void Add(int s) {
+        size += s;
+        if(prev != null) prev.Add(s);
+    }
+}
+
+
+Dir home = new Dir { prev = null, size = 0 };
+Dir cur;
+int l = 0;
+foreach(var line in input.Split("\n")) {
+    l++;
+    if(line.StartsWith("$ cd ")) {
+        string n = line.Substring(5);
+        if(n == "/") cur = home;
+        else
+        if(n == "..") {if(cur.prev == null) Console.WriteLine("OHH");cur = cur.prev;}
+        else {
+            if(cur.ch.ContainsKey(n)){
+                cur = cur.ch[n];
+            }else {
+                Dir ch = new Dir { prev = cur, size = 0 };
+                cur.ch[n] = ch;
+                cur = ch;
+            }
+        }        //Console.WriteLine(f(cur));
+
+        continue;
+    }
+    if(line.Ints().Count != 0) {
+        cur.Add(line.Ints().First());
+
+        continue;
+    }
+}
+int sum = 0;
+Stack<Dir> d= new Stack<Dir>();
+d.Push(home);
+while(d.Any()) {
+    var c = d.Pop();
+    if(c.size <= 100000) sum += c.size;
+    foreach(var dir in c.ch.Values) d.Push(dir);
+}
+sum
+
+#!csharp
+
+int free = 30000000 - (70000000 - home.size);
+int min = 30000000;
+Stack<Dir> d= new Stack<Dir>();
+d.Push(home);
+while(d.Any()) {
+    var c = d.Pop();
+    if(c.size <= min && c.size > free) min = c.size;
+    foreach(var dir in c.ch.Values) d.Push(dir);
+}
+min

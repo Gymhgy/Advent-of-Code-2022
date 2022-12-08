@@ -1,0 +1,32 @@
+#!csharp
+
+using System.IO;
+using System;
+using System.Linq;
+string input = File.ReadAllText("day4.txt");
+
+#!csharp
+
+input.Split().Count(x => {
+    var s = x.Split(',');
+    var a = int.Parse(s[0].Split('-')[0]);
+    var b = int.Parse(s[0].Split('-')[1]);
+
+    var c = int.Parse(s[1].Split('-')[0]);
+    var d = int.Parse(s[1].Split('-')[1]);
+
+    return (a <= d && b >= d) || (c <= a && d >= b);
+})
+
+#!csharp
+
+input.Split().Count(x => {
+    var s = x.Split(',');
+    var a = int.Parse(s[0].Split('-')[0]);
+    var b = int.Parse(s[0].Split('-')[1]);
+
+    var c = int.Parse(s[1].Split('-')[0]);
+    var d = int.Parse(s[1].Split('-')[1]);
+
+    return c <= b && d >= a;
+})

@@ -1,0 +1,96 @@
+#!csharp
+
+using System.IO;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+static List<int> Ints(this string s) {
+    return System.Text.RegularExpressions.Regex.Matches(s, "\\d+").Select(x => int.Parse(x.Value)).ToList();
+}
+string input = File.ReadAllText("day8.txt");
+Func<object,string> f = Microsoft.CodeAnalysis.CSharp.Scripting.Hosting.CSharpObjectFormatter.Instance.FormatObject;
+
+#!csharp
+
+int[][]map = input.Split().Select(x => x.Select(y => y - 48).ToArray()).ToArray();
+bool[,] seen = new bool[map.Length, map[0].Length];
+int rows = map.Length;
+int cols = map[0].Length;
+
+int s = 0;
+Console.WriteLine(1);
+
+for(int i = 0; i < rows; i ++ ) {
+    int cur = -1;
+    for(int j = 0; j < cols; j++ ) {
+        if(!seen[i,j] && map[i][j] > cur) {
+            seen[i,j] = true;
+            s++;
+            //Console.WriteLine((i,j));
+        }
+        cur = Math.Max(cur, map[i][j]);
+
+    }
+}
+Console.WriteLine(1);
+
+for(int i = 0; i < rows; i ++ ) {
+    int cur = -1;
+    for(int j = cols-1; j >= 0; j-- ) {
+        if(!seen[i,j] && map[i][j] > cur) {
+            seen[i,j] = true;
+            s++;
+            //Console.WriteLine((i,j, cur));
+        }
+        cur = Math.Max(cur, map[i][j]);
+
+    }
+}
+Console.WriteLine(1);
+
+for(int j = 0; j < cols; j ++ ) {
+    int cur = -1;
+    for(int i = 0; i < rows; i++ ) {
+        if(!seen[i,j] && map[i][j] > cur) {
+            
+            seen[i,j] = true;
+            s++;
+            //Console.WriteLine((i,j));
+
+        }
+        cur = Math.Max(cur, map[i][j]);
+    }
+}
+Console.WriteLine(1);
+for(int j = 0; j < cols; j ++ ) {
+    int cur = -1;
+    for(int i = rows-1; i >= 0; i-- ) {
+        if(!seen[i,j] && map[i][j] > cur) {
+            seen[i,j] = true;
+            s++;
+            //Console.WriteLine((i,j));
+        }
+        cur = Math.Max(cur, map[i][j]);
+
+    }
+}
+s
+
+#!csharp
+
+int max = 0;
+for(int i = 0; i < rows; i++) {
+    for(int j = 0; j < cols; j++) {
+
+        int scoreA = 0;
+        int scoreB = 0;
+        int scoreC = 0;
+        int scoreD = 0;
+        for(int w = i-1; w >=0 && ++scoreA>=0 && map[w][j] < map[i][j]; w--);
+        for(int w = i+1; w < rows && ++scoreB>=0 && map[w][j] < map[i][j]; w++);
+        for(int w = j-1; w >=0 && ++scoreC>=0 && map[i][w] < map[i][j]; w--);
+        for(int w = j+1; w < cols && ++scoreD>=0 && map[i][w] < map[i][j]; w++);
+        max = Math.Max(scoreA * scoreB * scoreC * scoreD, max);
+    }
+}
+max

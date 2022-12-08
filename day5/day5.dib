@@ -1,0 +1,57 @@
+#!csharp
+
+using System.IO;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+string input = File.ReadAllText("day5.txt");
+
+#!csharp
+
+var cs = input.Split("\n\n")[0].Split('\n');
+var ct = new List<List<char>>();
+for(int i = 0; i < 10; i++) ct.Add(new List<char>());
+for(int i = 0; i < 8; i++) {
+    for(int j = 1, k = 1; j < 36; j+=4, k++) {
+        if(cs[i][j] != ' ')
+            ct[k].Add(cs[i][j]);
+
+    }
+}
+var inst = input.Split("\n\n")[1].Split('\n');
+foreach(var i in inst) {
+    var s = i.Split();
+    var a = int.Parse(s[1]);
+    var b = int.Parse(s[3]);
+
+    var c = int.Parse(s[5]);
+    ct[c].InsertRange(0, ct[b].Take(a).Reverse());
+
+    ct[b].RemoveRange(0, a);
+}
+string.Concat(ct.Skip(1).Select(x => x[0]))
+
+#!csharp
+
+var cs = input.Split("\n\n")[0].Split('\n');
+var ct = new List<List<char>>();
+for(int i = 0; i < 10; i++) ct.Add(new List<char>());
+for(int i = 0; i < 8; i++) {
+    for(int j = 1, k = 1; j < 36; j+=4, k++) {
+        if(cs[i][j] != ' ')
+            ct[k].Add(cs[i][j]);
+
+    }
+}
+var inst = input.Split("\n\n")[1].Split('\n');
+foreach(var i in inst) {
+    var s = i.Split();
+    var a = int.Parse(s[1]);
+    var b = int.Parse(s[3]);
+
+    var c = int.Parse(s[5]);
+    ct[c].InsertRange(0, ct[b].Take(a));
+
+    ct[b].RemoveRange(0, a);
+}
+string.Concat(ct.Skip(1).Select(x => x[0]))

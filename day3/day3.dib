@@ -1,0 +1,27 @@
+#!csharp
+
+using System.IO;
+using System;
+using System.Linq;
+string input = File.ReadAllText("day3.txt");
+
+#!csharp
+
+input.Split().Sum(x => {
+    string a = x.Substring(0, x.Length/2);
+    string b = x.Substring(x.Length/2);
+    return a.Intersect(b).Sum(j => char.IsUpper(j) ? j-64+26 : j-96);
+})
+
+#!csharp
+
+int sum = 0;
+var lines = input.Split("\r\n");
+for(int i = 0; i < lines.Length / 3; i++) {
+    var j = lines[i*3].Intersect(lines[i*3+1]).Intersect(lines[i*3+2]).First();
+    sum += char.IsUpper(j) ? j-64+26 : j-96;
+}
+
+#!csharp
+
+sum
