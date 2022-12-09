@@ -1,0 +1,92 @@
+#!csharp
+
+using System.IO;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+static List<int> Ints(this string s) {
+    return System.Text.RegularExpressions.Regex.Matches(s, "\\d+").Select(x => int.Parse(x.Value)).ToList();
+}
+string input = File.ReadAllText("day9.txt");
+Func<object,string> f = Microsoft.CodeAnalysis.CSharp.Scripting.Hosting.CSharpObjectFormatter.Instance.FormatObject;
+
+#!csharp
+
+int xh = 0, yh = 0;
+int xt = 0, yt = 0;
+var vi = new HashSet<(int, int)>();
+int j = 0;
+foreach(var line in input.Split("\n")) {
+    var i = line.Ints()[0];
+    for(; i>0; i--) {
+        switch(line[0]) {
+            case 'R':
+                xh++;
+                break;
+            case 'L':
+                xh--;
+                break;
+            case 'U':
+                yh++;
+                break;
+            case 'D':
+                yh--;
+                break;
+            default: break;
+        }
+        int hd = Math.Sign(xh-xt);
+        int vd = Math.Sign(yh-yt);
+        var md = Math.Max(Math.Abs(xh - xt),Math.Abs(yh - yt));
+        if(md > 1) {
+            xt += hd;
+            yt += vd;
+        }
+        //Console.WriteLine(++j + ": " + ((xh,yh),(xt,yt), md));
+        vi.Add((xt, yt));
+
+    }
+}
+
+vi.Count
+
+#!csharp
+
+List<int[]> pos = new List<int[]>();
+for(int i = 0; i < 10; i++)pos.Add(new int[2]);
+
+var vi = new HashSet<(int, int)>();
+
+foreach(var line in input.Split("\n")) {
+    var i = line.Ints()[0];
+    for(; i>0; i--) {
+        switch(line[0]) {
+            case 'R':
+                pos[0][0]++;
+                break;
+            case 'L':
+                pos[0][0]--;
+                break;
+            case 'U':
+                pos[0][1]++;
+                break;
+            case 'D':
+                pos[0][1]--;
+                break;
+            default: break;
+        }
+        for(int j = 1; j < 10; j++) {
+            int hd = Math.Sign(pos[j-1][0]-pos[j][0]);
+            int vd = Math.Sign(pos[j-1][1]-pos[j][1]);
+            var md = Math.Max(Math.Abs(pos[j-1][0] - pos[j][0]),Math.Abs(pos[j-1][1] - pos[j][1]));
+            if(md > 1) {
+                pos[j][0] += hd;
+                pos[j][1] += vd;
+            }
+        }
+        vi.Add((pos[9][0], pos[9][1]));
+
+
+    }
+}
+
+vi.Count
