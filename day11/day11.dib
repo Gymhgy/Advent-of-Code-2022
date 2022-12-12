@@ -1,0 +1,11 @@
+#!csharp
+
+using System.IO;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+static List<int> Ints(this string s) {
+    return System.Text.RegularExpressions.Regex.Matches(s, @"-?\d+").Select(x => int.Parse(x.Value)).ToList();
+}
+string input = File.ReadAllText("day11.txt");
+Func<object,string> f = Microsoft.CodeAnalysis.CSharp.Scripting.Hosting.CSharpObjectFormatter.Instance.FormatObject;

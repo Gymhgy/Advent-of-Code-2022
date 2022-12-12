@@ -1,0 +1,103 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+using System.IO;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+static List<int> Ints(this string s) {
+    return System.Text.RegularExpressions.Regex.Matches(s, "-?\\d+").Select(x => int.Parse(x.Value)).ToList();
+}
+string input = File.ReadAllText("day12.txt");
+Func<object,string> f = Microsoft.CodeAnalysis.CSharp.Scripting.Hosting.CSharpObjectFormatter.Instance.FormatObject;
+
+#!csharp
+
+var ls = input.Split("\n");
+var w = ls[0].Length;
+var h = ls.Length;
+
+bool[,]vs = new bool[h,w];
+int[,]dist = new int[h,w];
+
+int r = Array.IndexOf(ls, ls.First(x => x.Contains("S")));
+int c = 0;
+
+int gr = Array.IndexOf(ls, ls.First(x => x.Contains("E")));
+int gc = ls.First(x => x.Contains("E")).IndexOf("E");
+
+var pq = new PriorityQueue<(int, int), int>();
+
+for(int i = 0; i < h; i++) {
+    for(int j = 0; j < w; j++) 
+        dist[i,j] = int.MaxValue;
+}
+
+dist[r,c] = 0;
+
+Console.WriteLine((r,c, gr, gc));
+
+#!csharp
+
+int x = r, y = c;
+var hm = input.Replace("S", "a").Replace("E", "z").Split();
+
+while(x != gr || y != gc) {
+    foreach(var (xx, yy) in new[] {(0,1), (1,0), (0,-1), (-1,0)}) {
+        if(x + xx < 0 || x + xx >= h || y + yy < 0 || y + yy >= w) continue;
+        if(vs[x+xx,y+yy])continue;
+        if(hm[x][y] - hm[x + xx][y+yy] < -1) continue;
+        var alt = dist[x,y] + 1;
+        if (alt < dist[x + xx, y +yy]) {
+
+            dist[x + xx,y+ yy] = alt;
+        }
+        pq.Enqueue((x + xx, y + yy), dist[x + xx,y+ yy]);
+
+    }
+
+    vs[x,y] = true;
+    (x,y) = pq.Dequeue();
+    while(vs[x,y]) (x,y) = pq.Dequeue();
+}
+
+dist[gr,gc]
+
+#!csharp
+
+for(int i = 0; i < h; i++) {
+    for(int j = 0; j < w; j++) {
+        dist[i,j] = int.MaxValue;
+        vs[i,j] = false;
+    }
+}
+
+dist[gr,gc] = 0;
+vs[gr, gc] = true;
+
+int x = gr, y = gc;
+var hm = input.Replace("S", "a").Replace("E", "z").Split();
+
+while(hm[x][y] != 'a') {
+    foreach(var (xx, yy) in new[] {(0,1), (1,0), (0,-1), (-1,0)}) {
+        if(x + xx < 0 || x + xx >= h || y + yy < 0 || y + yy >= w) continue;
+        if(vs[x+xx,y+yy])continue;
+        if(hm[x + xx][y+yy] - hm[x][y] < -1) continue;
+        var alt = dist[x,y] + 1;
+        if (alt < dist[x + xx, y +yy]) {
+
+            dist[x + xx,y+ yy] = alt;
+        }
+        pq.Enqueue((x + xx, y + yy), dist[x + xx,y+ yy]);
+
+    }
+
+    vs[x,y] = true;
+    (x,y) = pq.Dequeue();
+    while(vs[x,y]) (x,y) = pq.Dequeue();
+}
+
+dist[x,y]
