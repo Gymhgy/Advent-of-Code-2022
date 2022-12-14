@@ -1,0 +1,108 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+#r "../AOCUtils/AOCUtils/bin/Release/net6.0/AOCUtils.dll"
+using AOCUtils;
+using System.IO;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
+//await General.GetInput(14, "day14.txt", "53616c7465645f5f8d6b9bf4648bc39196e31516605d827b4d31775412fc790a35b69c4fe13ab660dcd19af72b73373749039158fc451745b90e5db4d3738289");
+string input = File.ReadAllText("day14.txt");
+
+#!csharp
+
+int[,] map = new int[1200, 171];
+
+int max = 0;
+int yMax = 0;
+foreach(var line in input.Split("\n")) {
+var g = line.Ints();
+    (int x, int y) v1 = (g[0], g[1]);
+    for(int i = 1; i < g.Count / 2; i++) {
+        (int x, int y) v2 = (g[i*2], g[i*2+1]);
+        yMax = Math.Max(yMax, v2.y);
+
+        while(v1 != v2) {
+            map[v1.x, v1.y] = 1;
+            v1 = (v1.x + Math.Sign(v2.x-v1.x), v1.y + Math.Sign(v2.y-v1.y));
+
+        }
+    }
+    map[v1.x, v1.y] = 1;
+
+}
+bool f = false;
+var (x, y) = (500, 0);
+int s = 0;
+while(true) {
+    if(f) {
+        try {
+            if(map[x, y+1] == 0) {
+                y++;
+            }
+            else if(map[x-1, y+1] == 0) {
+                x--; y++;
+            }
+            else if(map[x+1, y+1] == 0) {
+                x ++; y++;
+            }
+            else {
+                f = false;
+                map[x, y] = 2;
+                s++;
+            }
+        }
+        catch {
+            break;
+        }
+    }
+    else {
+        (x, y) = (500, 0);
+        f= true;
+    }
+}
+s
+
+#!csharp
+
+bool f = false;
+var (x, y) = (500, 0);
+while(true) {
+    if(f) {
+        
+        if(y == yMax + 1) {
+            f = false;
+            map[x, y] = 2;
+            s++;
+        }
+
+        else if(map[x, y+1] == 0) {
+            y++;
+        }
+        else if(map[x-1, y+1] == 0) {
+            x--; y++;
+        }
+        else if(map[x+1, y+1] == 0) {
+            x ++; y++;
+        }
+        else {
+            f = false;
+            map[x, y] = 2;
+            s++;
+
+            if(x == 500 && y == 0) break;
+        }
+        
+        
+    }
+    else {
+        (x, y) = (500, 0);
+        f= true;
+    }
+}
+s
