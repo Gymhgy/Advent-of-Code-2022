@@ -1,0 +1,108 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+#r "../AOCUtils/AOCUtils/bin/Release/net6.0/AOCUtils.dll"
+using AOCUtils;
+using System.IO;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
+string input = File.ReadAllText("day15.txt");
+
+#!csharp
+
+HashSet<(int, int)> be = new();
+
+List<(int x, int y, int d)> l = new();
+
+
+foreach(var line in input.Split("\n")) {
+var g = line.Ints();
+var (x, y) = (g[0], g[1]);
+var (i, j) = (g[2], g[3]);
+
+var d = (x, y).ManhattanDist((i, j));
+
+l.Add((x, y, d));
+
+be.Add((i, j));
+
+}
+int u =2000000;
+int j = 0;
+
+foreach(var (x, y, d) in l) {
+
+int i = Math.Abs(y- u);
+if(i > d) continue;
+int xx = d - i;
+for(int st = x - xx; st <= x + xx; st++) {
+    if(!be.Contains((st, u))) {
+        j++;
+        be.Add((st, u));
+    }
+}
+
+
+}
+
+j
+
+#!csharp
+
+HashSet<(int, int)> be = new();
+
+List<(int x, int y, int d)> l = new();
+
+
+foreach(var line in input.Split("\n")) {
+var g = line.Ints();
+var (x, y) = (g[0], g[1]);
+var (i, j) = (g[2], g[3]);
+
+var d = (x, y).ManhattanDist((i, j));
+
+l.Add((x, y, d));
+
+be.Add((i, j));
+
+}
+
+HashSet<(int, int)> ca = new();
+bool first = true;
+int u =4000000;
+int k = 0;
+foreach(var (x, y, d) in l) {
+
+    for(int i = Math.Max(0, y - d - 1); i <= Math.Min(u, y+d+1); i++) {
+        int xx = (d+1) - Math.Abs(y-i);
+
+        if(i >= 0 && i <= u && (x+xx) >= 0 && x+xx <= u) {
+            ca.Add((x + xx, i));
+        }
+        if(i >= 0 && i <= u && (x-xx) >= 0 && x-xx <= u) {
+            ca.Add((x - xx, i));
+        }
+    }
+}
+
+foreach(var (x, y, d) in l) {
+    HashSet<(int, int)> n = new();
+    foreach(var (cx, cy) in ca) {
+        if((x,y).ManhattanDist((cx, cy)) > d) {
+            n.Add((cx, cy));
+        }
+    }
+    ca = n;
+}
+
+ca
+
+#!csharp
+
+var (x, y) = ca.Single();
+(long)x * u + y

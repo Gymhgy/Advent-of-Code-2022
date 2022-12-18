@@ -1,0 +1,188 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+#r "../AOCUtils/AOCUtils/bin/Release/net6.0/AOCUtils.dll"
+using AOCUtils;
+using System.IO;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
+await General.GetInput(16, "day16.txt", "53616c7465645f5f8d6b9bf4648bc39196e31516605d827b4d31775412fc790a35b69c4fe13ab660dcd19af72b73373749039158fc451745b90e5db4d3738289");
+
+string input = File.ReadAllText("day16.txt");
+
+#!csharp
+
+Dictionary<string, int> flow = new();
+Dictionary<string, List<string>> adj = new();
+foreach(var line in input.Split("\n")){ 
+var r = line.Ints()[0];
+var k = Regex.Matches(line, @"[A-Z][A-Z]").Select(x => x.Value).ToList();
+var g = k.Skip(1).ToList();
+
+flow.Add(k[0],r);
+adj.Add(k[0], g);
+}
+adj
+
+#!csharp
+
+//floyd warshall
+
+var ke = adj.Keys;
+Dictionary<(string, string), int>dist = new();
+
+foreach(var (source, a) in adj) {
+    foreach(var va in a) dist.Add((source, va), 1);
+    dist.Add((source, source), 0);
+}
+foreach(var k1 in ke) {
+foreach(var k2 in ke) {
+    if(!dist.ContainsKey((k1, k2))) dist.Add((k1, k2), 60000);
+}
+}
+foreach(var (k, _) in adj) {
+foreach(var (i, _) in adj)
+foreach(var (j, _) in adj)
+
+if(dist[(i,j)] > dist[(i,k)] + dist[(k,j)])
+dist[(i,j)] = dist[(i,k)] + dist[(k,j)];
+
+}
+
+var valves = ke.Where(x => flow[x] > 0).ToList();
+var vc = valves.Count;
+dist.Where(x => x.Key.Item1 == "XK")
+
+#!csharp
+
+var idc = Enumerable.Range(0, vc).Select(x => 1 << x).ToList();
+Dictionary<(int, int), int> g = new(); 
+Dictionary<(int, int), int> mins = new(); 
+Dictionary<(int, int), int> parent = new();
+IEnumerable<int> Combos(int len) => len == 1 ? 
+    idc :
+    Combos(len - 1).SelectMany(x => idc.Where(o => o > x), (x, n) => x | n);
+
+foreach(var v in valves) {
+int i = valves.IndexOf(v);
+g[(1 << i, i)] = flow[v] * (30 - 1 - dist[("AA", v)]);
+mins[(1 << i, i)] = 30 - 1 - dist[("AA", v)];
+}
+
+for(int size = 2; size <= vc; size++) {
+    foreach(var c in Combos(size)) {
+        int cc = c;
+        int i = 0;
+        var subset = new List<int>();
+        for(; cc > 0; cc/=2, i++) {
+            if((cc & 1) == 1) {
+                subset.Add(i);
+            }
+        }
+
+        foreach(var k in subset) {
+            //Toggle k off
+            int p = c & ~(1 << k);
+             int max = 0;
+            int min = 0;
+            int par = 0;
+            foreach(var m in subset) {
+                if(m==k)continue;
+                int d = dist[(valves[m], valves[k])]+1;
+                int pressure = g[(p, m)] + flow[valves[k]]*Math.Max(0, mins[(p, m)]-d);
+                                    
+//if(c == 0b110101 && k == 4) (m, d, g[(p,m)]).F();
+
+                if(pressure > max) {
+                    max = pressure;
+                    min = mins[(p, m)]-d;
+                    par = m;
+                }
+            }
+
+            g[(c, k)] = max;
+            mins[(c, k)] = min;
+            parent[(c, k)] = par;
+            //if(size == 2) (Convert.ToString(c, 2), k, max, min).F();
+        }
+    }
+}
+
+g.Where(l => mins[l.Key] >= 0).OrderByDescending(x => x.Value).First()
+
+#!csharp
+
+//part 2
+
+var idc = Enumerable.Range(0, vc).Select(x => 1 << x).ToList();
+Dictionary<(int, int), int> g = new(); 
+Dictionary<int, int> gc = new(); 
+Dictionary<(int, int), int> mins = new(); 
+IEnumerable<int> Combos(int len) => len == 1 ? 
+    idc :
+    Combos(len - 1).SelectMany(x => idc.Where(o => o > x), (x, n) => x | n);
+
+foreach(var v in valves) {
+int i = valves.IndexOf(v);
+g[(1 << i, i)] = flow[v] * (26 - 1 - dist[("AA", v)]);
+gc[1 << i] = g[(1 << i, i)];
+
+mins[(1 << i, i)] = 26 - 1 - dist[("AA", v)];
+}
+for(int size = 2; size <= vc; size++) {
+    foreach(var c in Combos(size)) {
+        int cc = c;
+        gc[c] = 0;
+        int i = 0;
+        var subset = new List<int>();
+        for(; cc > 0; cc/=2, i++) {
+            if((cc & 1) == 1) {
+                subset.Add(i);
+            }
+        }
+
+        foreach(var k in subset) {
+            //Toggle k off
+            int p = c & ~(1 << k);
+            int max = 0;
+            int min = 0;
+            foreach(var m in subset) {
+                if(m==k)continue;
+                int d = dist[(valves[m], valves[k])]+1;
+                int pressure = g[(p, m)] + flow[valves[k]]*Math.Max(0, mins[(p, m)]-d);
+                                    
+                if(pressure > max) {
+                    max = pressure;
+                    min = mins[(p, m)]-d;
+                }
+            }
+
+            g[(c, k)] = max;
+            gc[c] = Math.Max(gc[c], max);
+            mins[(c, k)] = min;
+        }
+    }
+}
+
+g.Where(l => mins[l.Key] >= 0).OrderByDescending(x => x.Value).First()
+
+#!csharp
+
+int n = 1 << (valves.Count-1);
+int mask = (1 << valves.Count) -1;
+int k = 0;
+int max = 0;
+for(int i = 1; i < n; i++) {
+var comb = gc[i] + gc[~i & mask];
+if(comb > max ) {
+max = comb;
+k=i;
+}
+}
+
+max

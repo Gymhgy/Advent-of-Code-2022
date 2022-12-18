@@ -1,0 +1,62 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+#r "../AOCUtils/AOCUtils/bin/Release/net6.0/AOCUtils.dll"
+using AOCUtils;
+using System.IO;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
+string input = File.ReadAllText("day18.txt");
+
+#!csharp
+
+HashSet<(int x ,int y,int z)> cubes = new();
+input.Lines(x => {
+    var i = x.Ints();
+    cubes.Add((i[0], i[1], i[2]));
+});
+long area = 0;
+foreach(var (x,y,z) in cubes) {
+long s = 6;
+    foreach(var (i,j,k) in new[]{(0,0,1),(0,0,-1),(0,1,0),(0,-1,0),(1,0,0),(-1,0,0)}) {
+        if(cubes.Contains((x+i,y+j,z+k)))s--;
+    }
+    area += s;
+}
+area
+
+#!csharp
+
+int maxX = cubes.Max(x => x.x);
+int maxY = cubes.Max(y => y.y);
+int maxZ = cubes.Max(z => z.z);
+int minX = cubes.Min(x => x.x);
+int minY = cubes.Min(y => y.y);
+int minZ = cubes.Min(z => z.z);
+(maxX,maxY,maxZ,minX,minY,minZ).F();
+HashSet<(int x, int y, int z)> visited = new();
+
+int area = 0;
+
+Stack<(int, int, int)> stack = new();
+stack.Push((minX-1, minY-1, minZ-1));
+while(stack.Any()) {
+    var (x,y,z) = stack.Pop();
+    if(visited.Contains((x,y,z))) continue;
+    visited.Add((x,y,z));
+    foreach(var (i,j,k) in new[]{(0,0,1),(0,0,-1),(0,1,0),(0,-1,0),(1,0,0),(-1,0,0)}) {
+        if(!visited.Contains((x+i,y+j,z+k)) && !cubes.Contains((x+i,y+j,z+k))) {
+            if(minX-1 <= x+i && x+i <= maxX+1 && minY-1 <= y+j && y+j <= maxY+1 && minZ-1 <= z+k && z+k <= maxZ+1)
+                stack.Push((x+i,y+j,z+k));
+        }
+        if(cubes.Contains((x+i,y+j,z+k))) area++;
+
+    }
+
+}
+area
