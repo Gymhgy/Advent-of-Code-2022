@@ -1,0 +1,72 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+#r "../AOCUtils/AOCUtils/bin/Release/net6.0/AOCUtils.dll"
+using AOCUtils;
+using System.IO;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
+string input = File.ReadAllText("day21.txt");
+
+#!csharp
+
+Dictionary<string, long> s = new();
+Dictionary<string, string> inst = new();
+input.Lines(x => {
+    var g = x.Split(": ");
+    s[g[0]] = 0;
+    if(int.TryParse(g[1], out var i)) {
+        s[g[0]] = i;
+    }
+    else inst[g[0]] = g[1];
+});
+while(s["root"] == 0) {
+foreach(var (k, v) in inst) {
+    var g = v.Split(" ");
+    var op = g[1];
+    var a = s[g[0]];
+    var b = s[g[2]];
+    if(a== 0 || b ==0)continue;
+    switch(op) {
+        case "+":
+            s[k] = a+b;
+            break;
+        case "*":
+            s[k] = a*b;
+            break;
+        case "-":
+            s[k] = a-b;
+            break;
+        case "/":
+            s[k] = a/b;
+            break;
+    }
+    inst.Remove(k);
+
+        break;
+
+}
+}
+s["root"]
+
+#!csharp
+
+Dictionary<string, string> inst = new();
+input.Lines(x => {
+    var g = x.Split(": ");
+    inst[g[0]] = g[1];
+});
+inst["root"] = 
+inst["root"].Replace("+", "-");
+string E(string monkey) {
+    if(monkey == "humn") return "b";
+    if(int.TryParse(inst[monkey], out _)) return inst[monkey];
+    var j = inst[monkey].Split();
+    return $"({E(j[0])}{j[1]}{E(j[2])})";
+}
+E("root")

@@ -1,0 +1,36 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+#r "../AOCUtils/AOCUtils/bin/Release/net6.0/AOCUtils.dll"
+using AOCUtils;
+using System.IO;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
+string input = File.ReadAllText("day20.txt");
+
+#!csharp
+
+var j = input.Ints();
+var k = Enumerable.Range(0, j.Count).ToList();
+
+var p = j.Count-1;
+
+for(int i = 0 ; i < j.Count; i++) {
+    var mi = k.IndexOf(i);
+    var num = j[i];
+    int d = mi+num;
+    d = (d%p+p)%p;
+    //t.F();
+    k.RemoveAt(mi);
+
+    k.Insert(d, i);
+    //k.F();
+}
+j=k;
+int z = j.IndexOf(0);
+j[(z+1000)%j.Count] + j[(z+2000)%j.Count] + j[(z+3000)%j.Count]

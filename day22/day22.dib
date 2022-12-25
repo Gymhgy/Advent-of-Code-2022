@@ -1,0 +1,325 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+#r "../AOCUtils/AOCUtils/bin/Release/net6.0/AOCUtils.dll"
+using AOCUtils;
+using System.IO;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
+string input = File.ReadAllText("day22.txt");
+
+#!csharp
+
+var inst = input.Lines().Last();
+var map = input.Split("\n").SkipLast(2).ToList();
+int cols = map.Max(x => x.Length);
+int rows = map.Count;
+
+int[] colStarts = new int[cols];
+int[] colEnds = new int[cols];
+
+int[] rowStarts = new int[rows];
+int[] rowEnds = new int[rows];
+
+HashSet<(int, int)> walls = new();
+
+bool[] colStart = new bool[cols];
+for(int i = 0; i < rows; i++) {
+    bool rowStart = false;
+    for(int j = 0; j < map[i].Length; j++) {
+        if(map[i][j] == '#') walls.Add((i,j));
+        if(!rowStart && map[i][j] != ' ') {
+            rowStarts[i] = j;
+            rowStart = true;
+        }
+        if(!colStart[j] && map[i][j] != ' ') {
+            colStart[j] = true;
+            colStarts[j] = i;
+        }
+    }
+    rowEnds[i] = map[i].Length - 1;
+}
+for(int j = 0; j < cols; j++) {
+    bool colStart = false;
+    for(int i = 0; i < rows+1; i++) {try{
+        if(!colStart && map[i][j] != ' ') colStart = true;
+
+        if(colStart && map[i-1][j] != ' ')  {
+            colEnds[j] = i-1;
+        }}
+        catch{}
+    }
+}
+
+var mMap = map.Select(x => x.ToCharArray()).ToArray();
+//0 left 1 up 2 right 3 down
+int dr = 0;
+int dc = 1;
+int r = 0, c = rowStarts[0];
+foreach(Match j in Regex.Matches(inst, @"(\D+|\d+)")) {
+    var s = j.Value;
+
+    if(int.TryParse(s, out int steps)) {
+        for(int i = 0; i < steps; i++) {
+            c += dc;
+            r += dr;
+            if(dc == 1 && c > rowEnds[r]) {
+
+                if(map[r][rowStarts[r]] == '#') {
+                    c-=dc;
+                    r-=dr;
+                    break;
+                }
+                c = rowStarts[r];
+            }
+
+            if(dr == 1 && r > colEnds[c]) {                      
+
+                if(map[colStarts[c]][c] == '#') {
+                    c-=dc;
+                    r-=dr;
+                    break;
+                }
+                r = colStarts[c];
+            }
+
+            if(dc == -1 && c < rowStarts[r]) {                    
+
+                if(map[r][rowEnds[r]] == '#') {
+                    c-=dc;
+                    r-=dr;
+                    break;
+                }
+                c = rowEnds[r];
+            }
+
+            if(dr == -1 && r < colStarts[c]) {                        
+                if(map[colEnds[c]][c] == '#') {   
+                    c-=dc;
+                    r-=dr;
+                    break;
+                }
+                r = colEnds[c];
+            }
+
+            if(map[r][c] == '#') {
+                r-=dr;
+                c-=dc;
+                break;
+            }
+
+            mMap[r][c] = ">v<^"[ Array.IndexOf(new[]{(0,1), (1,0), (0, -1), (-1,0)}, (dr, dc))];
+        }
+    }
+    else {
+        if(s == "R") {
+            (dr, dc) = (dc, -dr);
+        }
+        else {
+            (dr, dc) = (-dc, dr);
+        }
+    }
+}
+(r,c).F();
+
+1000 * (r+1) + 4*(c+1) + Array.IndexOf(new[]{(0,1), (1,0), (0, -1), (-1,0)}, (dr, dc))
+
+#!csharp
+
+int dr = 0, dc = 1;
+int r = 0, c = 50;
+
+foreach(Match j in Regex.Matches(inst, @"(\D+|\d+)")) {
+
+    var s = j.Value;
+    if(int.TryParse(s, out int steps)) {
+        for(int i = 0; i < steps; i++) {
+
+            //1
+            if(dc == 1 && r < 50 && c == 149) {
+                int nc = 99;
+                int nr = 149 - r;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (0, -1);
+                }                   
+                else break;
+            }
+
+            //2
+            else if(dr == 1 && r == 49 && c >= 100) {
+                int nc = 99;
+                int nr = c - 50;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (0, -1);
+                }                   
+                else break;
+            }
+
+            //3
+            else if(dr == -1 && r == 0 && c >= 100) {
+                int nc = c - 100;
+                int nr = 199;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (-1, 0);
+                }                   
+                else break;
+            }
+
+            //4
+            else if(dr == -1 && r == 0 && c >= 50 && c < 100) {
+                int nc = 0;
+                int nr = 100 + c;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (0,1);
+                }                   
+                else break;
+            }
+
+            //5
+            else if(dc == -1 && c == 50 && r < 50) {
+                int nc = 0;
+                int nr = 149-r;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (0,1);
+                }                   
+                else break;
+            }
+
+            //6
+            else if(dc == -1 && c == 50 && r >= 50 && r < 100) {
+                int nc = r-50;
+                int nr = 100;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (1, 0);
+                }                   
+                else break;
+            }
+            
+            //7
+            else if(dr == 1 && c >= 50 && c < 100 && r == 149) {
+                int nc = 49;
+                int nr = c + 100;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (0, -1);
+                }                   
+                else break;
+            }
+
+            //8
+            else if(dc == 1 && c == 99 && r >= 100 && r < 150) {
+                int nc = 149;
+                int nr = 149 - r;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (0, -1);
+                }                   
+                else break;
+            }
+
+            //9
+            else if(dc == 1 && c == 99 && r >= 50 && r < 100) {
+                int nc = r + 50;
+                int nr = 49;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (-1, 0);
+                }                   
+                else break;
+            }
+
+            //10
+            else if(dr == 1 && r == 199 && c < 50) {
+                int nc = c + 100;
+                int nr = 0;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (1, 0);
+                }                   
+                else break;
+            }
+
+            //11
+            else if(dc == -1 && c== 0 && r >= 150) {
+                int nc = r-100;
+                int nr = 0;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr,dc) = (1, 0);
+                }                   
+                else break;
+            }
+
+            //12
+            else if(dc == -1 && c== 0 && r >= 100 && r < 150) {
+                int nc = 50;
+                int nr = 149-r;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (0,1);
+                }                   
+                else break;
+            }
+
+            //13
+            else if(dr == -1 && r == 100 & c >= 0 && c < 50) {
+                int nc = 50;
+                int nr = 50 + c;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (0, 1);
+                }                   
+                else break;
+            }
+
+            //14
+            else if(dc == 1 && c == 49 && r >= 150) {
+                int nc = r - 100;
+                int nr = 149;
+                if(map[nr][nc] != '#') {
+                    r = nr;
+                    c = nc;
+                    (dr, dc) = (-1, 0);
+                }                   
+                else break;
+            }
+            else {
+            c += dc;
+            r += dr; }
+        }
+    }
+    else {
+        if(s == "R") {
+            (dr, dc) = (dc, -dr);
+        }
+        else {
+            (dr, dc) = (-dc, dr);
+        }
+    }
+}
+(r,c).F();
+1000 * (r+1) + 4*(c+1) + Array.IndexOf(new[]{(0,1), (1,0), (0, -1), (-1,0)}, (dr, dc))

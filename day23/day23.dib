@@ -1,0 +1,153 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+#r "../AOCUtils/AOCUtils/bin/Release/net6.0/AOCUtils.dll"
+using AOCUtils;
+using System.IO;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
+string input = File.ReadAllText("day23.txt");
+string[] lines = input.Split("\n");
+
+#!csharp
+
+HashSet<(int, int)> elves = new HashSet<(int, int)>();
+
+for(int i = 0; i < lines.Length; i++) 
+    for(int j = 0; j < lines[i].Length; j++) 
+        if(lines[i][j] == '#') elves.Add((j,lines.Length - i - 1));
+
+int o = 0;
+for(int i = 0; i < 10; i++) {
+
+    var prop = new Dictionary<(int, int), int>();
+    var move = new Dictionary<(int, int), (int, int)>();
+    var newElves = new HashSet<(int, int)>();
+    foreach(var (x, y) in elves) {
+        var k = new[]{
+            new[]{(x,y+1),(x-1,y+1),(x+1,y+1)},
+            new[]{(x,y-1),(x-1,y-1),(x+1,y-1)},
+            new[]{(x-1,y),(x-1,y-1),(x-1,y+1)},
+            new[]{(x+1,y),(x+1,y-1),(x+1,y+1)},
+        };
+        var l = new[]{
+            (x, y+1),
+            (x, y-1),
+            (x-1, y),
+            (x+1, y)
+        };
+        var adj = new[]{(x,y+1),(x-1,y+1),(x+1,y+1), 
+                        (x,y-1),(x-1,y-1),(x+1,y-1), 
+                        (x-1,y), (x+1,y)
+                        };
+        if(adj.All(n => !elves.Contains(n))) {
+            continue;
+        }
+
+        for(int j = 0; j < 4; j++) {
+            if(k[(o+j)%4].All(n => !elves.Contains(n))) {
+                var n = l[(o+j)%4];
+                if(!prop.ContainsKey(n)) prop[n] = 1;
+                else prop[n]++;
+                move[(x,y)] = n;
+
+                break;
+            }
+        }
+    }
+
+    foreach(var n in elves) {
+        if(move.ContainsKey(n) && prop[move[n]] == 1) {
+            newElves.Add(move[n]); 
+        }
+        else {
+            newElves.Add(n);
+        }
+    }
+    elves = newElves;
+    o++;
+
+
+}
+int minX = elves.Min(n => n.Item1), maxX = elves.Max(n => n.Item1);
+int minY = elves.Min(n => n.Item2), maxY = elves.Max(n => n.Item2);
+
+int s = 0;
+for(int y = maxY; y >= minY; y--) {
+    string line = "";
+    for(int x = minX; x <= maxX; x++) {
+        if(!elves.Contains((x, y))) s++;
+        //line += elves.Contains((x, y)) ? '#' : '.';
+    }
+    //Console.WriteLine(line);
+}
+s
+
+#!csharp
+
+HashSet<(int, int)> elves = new HashSet<(int, int)>();
+
+for(int i = 0; i < lines.Length; i++) 
+    for(int j = 0; j < lines[i].Length; j++) 
+        if(lines[i][j] == '#') elves.Add((j,lines.Length - i - 1));
+
+int o = 0;
+for(;;) {
+
+    var prop = new Dictionary<(int, int), int>();
+    var move = new Dictionary<(int, int), (int, int)>();
+    var newElves = new HashSet<(int, int)>();
+    foreach(var (x, y) in elves) {
+        var k = new[]{
+            new[]{(x,y+1),(x-1,y+1),(x+1,y+1)},
+            new[]{(x,y-1),(x-1,y-1),(x+1,y-1)},
+            new[]{(x-1,y),(x-1,y-1),(x-1,y+1)},
+            new[]{(x+1,y),(x+1,y-1),(x+1,y+1)},
+        };
+        var l = new[]{
+            (x, y+1),
+            (x, y-1),
+            (x-1, y),
+            (x+1, y)
+        };
+        var adj = new[]{(x,y+1),(x-1,y+1),(x+1,y+1), 
+                        (x,y-1),(x-1,y-1),(x+1,y-1), 
+                        (x-1,y), (x+1,y)
+                        };
+        if(adj.All(n => !elves.Contains(n))) {
+            continue;
+        }
+
+        for(int j = 0; j < 4; j++) {
+            if(k[(o+j)%4].All(n => !elves.Contains(n))) {
+                var n = l[(o+j)%4];
+                if(!prop.ContainsKey(n)) prop[n] = 1;
+                else prop[n]++;
+                move[(x,y)] = n;
+
+                break;
+            }
+        }
+    }
+
+    foreach(var n in elves) {
+        if(move.ContainsKey(n) && prop[move[n]] == 1) {
+            newElves.Add(move[n]); 
+        }
+        else {
+            newElves.Add(n);
+        }
+    }
+    o++;    
+    if(elves.SequenceEqual(newElves)) {
+        o.F();
+        break;
+    }
+    elves = newElves;
+
+}

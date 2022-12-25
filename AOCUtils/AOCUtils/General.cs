@@ -35,7 +35,7 @@ namespace AOCUtils {
                 f(l, i++);
             }
         }
-        public static List<string> Lines(this string s) => s.Split("\n\n").ToList();
+        public static List<string> Lines(this string s) => s.Split("\n").ToList();
         public static void Unchunk(this string s, Action<string> f) {
             foreach (var l in s.Split("\n\n")) {
                 f(l);

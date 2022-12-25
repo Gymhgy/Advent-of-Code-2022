@@ -1,0 +1,145 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+#r "../AOCUtils/AOCUtils/bin/Release/net6.0/AOCUtils.dll"
+using AOCUtils;
+using System.IO;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
+string input = File.ReadAllText("day24.txt");
+string[] lines = input.Split("\n");
+
+#!csharp
+
+HashSet<(int, int, int)> bliz1 = new();
+for(int i = 0; i < lines.Length; i++) {
+    for(int j = 0; j < lines[0].Length; j++) {
+        var n = "<^>v".IndexOf(lines[i][j]);
+        if(n != -1) {
+            bliz1.Add((i,j,n));
+        }
+    }
+}
+List<HashSet<(int, int, int)>> blizzes = new();
+blizzes.Add(bliz1);
+
+var rows = lines.Length;
+var cols = lines[0].Length;
+(rows, cols).F();
+HashSet<(int, int, int)> BlizAt(int min) {
+    if(min < blizzes.Count) return blizzes[min];
+    else {
+        while(min >= blizzes.Count) {
+            var bliz = new HashSet<(int, int, int)>();
+            foreach(var (r, c, t) in blizzes.Last()) {
+                int nr = r, nc = c;
+                if(t == 0) {
+                    if(c == 1) nc = cols-2;
+                    else nc--;
+                }
+                if(t == 1) {
+                    if(r == 1) nr = rows-2;
+                    else nr--;
+                }
+                if(t == 2) {
+                    if(c == cols-2) nc = 1;
+                    else nc++;
+                }
+                if(t == 3) {
+                    if(r == rows-2) nr = 1;
+                    else nr++;
+                }
+                bliz.Add((nr,nc,t));
+            }
+            blizzes.Add(bliz);
+        }
+
+        return blizzes[min];
+    }
+}
+void PrintBliz(HashSet<(int, int, int)> bliz, (int r, int c)? loc = null) {
+    for(int r = 0; r < rows; r++){
+        string line = "";
+        for(int c = 0; c < cols; c++) {
+            int j = 0;
+            if(!In(r,c)) line+='#';
+            else if((r,c) == loc) line+='E';
+            else {
+                char g = '.';
+                if(bliz.Contains((r,c,0))) {g='<';j++;}
+                if(bliz.Contains((r,c,1))) {g='^';j++;}
+                if(bliz.Contains((r,c,2))) {g='>';j++;}
+                if(bliz.Contains((r,c,3))) {g='v';j++;}
+                if(j>1)g = j.ToString()[0];
+                line += g;
+            }
+        }
+        Console.WriteLine(line);
+    }
+    Console.WriteLine();
+}
+var s = (r: 0, c: 1);
+var end = (rows-1, cols-2);
+
+bool In(int r, int c) => (r,c) == s || (r,c) == end || 
+        (r < rows - 1 && r > 0 && c < cols - 1 && c > 0);
+bool Unblizzed(int r, int c, HashSet<(int, int, int)> bliz) {
+    return new[]{0,1,2,3}.All(x => !bliz.Contains((r,c,x)));
+}
+PriorityQueue<(int, int, int), int> pq = new();
+HashSet<(int, int, int)> visited = new();
+
+pq.Enqueue((s.r, s.c, t), 0);
+var (r, c) = s;
+int t = 0;
+while((r,c) != end) {
+    (r, c, t) = pq.Dequeue();
+    if(visited.Contains((r,c,t))) continue;
+    visited.Add((r,c,t));
+    //("Pop", r,c).F();
+    foreach(var (nr, nc) in new[]{(r+1,c),(r-1,c),(r,c+1),(r,c-1),(r,c)}) {
+        //("N", nr, nc).F();
+        if(!In(nr, nc)) continue;
+        int alt = t+1;
+        var bliz = BlizAt(t+1);
+        //PrintBliz(bliz);
+        if(Unblizzed(nr, nc, bliz)) {
+            //("F",nr, nc).F();
+            pq.Enqueue((nr, nc, t+1), t+1);
+        }
+    }
+}
+t
+
+#!csharp
+
+for(int i = 0; i < 2; i++) {
+    visited = new();
+    pq = new();
+    pq.Enqueue((end.Item1, end.Item2, t), 0);
+    end = i == 0 ? (0, 1) : (rows - 1, cols - 2);
+
+    while((r,c) != end) {
+        (r, c, t) = pq.Dequeue();
+        if(visited.Contains((r,c,t))) continue;
+        visited.Add((r,c,t));
+        //("Pop", r,c).F();
+        foreach(var (nr, nc) in new[]{(r+1,c),(r-1,c),(r,c+1),(r,c-1),(r,c)}) {
+            //("N", nr, nc).F();
+            if(!In(nr, nc)) continue;
+            int alt = t+1;
+            var bliz = BlizAt(t+1);
+            //PrintBliz(bliz);
+            if(Unblizzed(nr, nc, bliz)) {
+                //("F",nr, nc).F();
+                pq.Enqueue((nr, nc, t+1), t+1);
+            }
+        }
+    }
+}
+t

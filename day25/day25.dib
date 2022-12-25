@@ -1,0 +1,47 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+#r "../AOCUtils/AOCUtils/bin/Release/net6.0/AOCUtils.dll"
+using AOCUtils;
+using System.IO;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
+string input = File.ReadAllText("day25.txt");
+string[] lines = input.Split("\n");
+
+#!csharp
+
+long l = lines.Sum(x => {
+    long s = 0;
+    long m = 1;
+    for(int j = x.Length - 1; j >= 0; j--) {
+        s += m * ("=-012".IndexOf(x[j])-2);
+        m *= 5;
+    }
+    return s;
+});
+
+string ToSnafu(long s) {
+    string snafu = "";
+    for(; s > 0; s/=5) {
+        int n = (int)(s % 5);
+        if(n < 3 && n >= 0) {
+            snafu = n + snafu;
+        }
+        else if(n == 4) {
+            snafu = '-' + snafu;
+            s += 1;
+        }
+        else if(n == 3) {
+            snafu = '=' + snafu;
+            s += 2;
+        }
+    }
+    return snafu;
+}
+ToSnafu(1747)

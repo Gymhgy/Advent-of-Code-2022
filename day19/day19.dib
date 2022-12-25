@@ -1,0 +1,157 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":null,"items":[{"name":"csharp","languageName":"C#","aliases":["c#","cs"]},{"name":"fsharp","languageName":"F#","aliases":["f#","fs"]},{"name":"pwsh","languageName":"PowerShell","aliases":["powershell"]},{"name":"javascript","languageName":"JavaScript","aliases":["js"]},{"name":"html","languageName":"HTML"},{"name":"sql","languageName":"SQL"},{"name":"kql","languageName":"KQL"},{"name":"mermaid","languageName":"Mermaid"},{"name":"httpRequest","languageName":"http"},{"name":"value"}]}}
+
+#!csharp
+
+#r "../AOCUtils/AOCUtils/bin/Release/net6.0/AOCUtils.dll"
+using AOCUtils;
+using System.IO;
+using System.Linq;
+using System;
+using System.Text.RegularExpressions;
+
+string input = File.ReadAllText("day19.txt");
+
+#!csharp
+
+int sum = 0;
+
+input.Lines(blueprint => {
+var g = blueprint.Ints();
+var n = g[0];
+var oreCost = g[1];
+var clayCost = g[2];
+var obsidianCost = (g[3], g[4]);
+var geodeCost = (g[5], g[6]);
+
+var maxOre = new[]{clayCost, obsidianCost.Item1, geodeCost.Item1}.Max();
+var maxClay = obsidianCost.Item2;
+var maxObsidian = geodeCost.Item2;
+
+int maxGeodes = 0;
+Queue<(int, int, int, int, int, int, int, int, int, int)> s = new();
+int lowerbound = 0;
+for(int i = 1; i <= 4; i++)
+    s.Enqueue((0,0,0,0,1,0,0,0,0,i));
+
+//0 - undecided
+//1 - ore
+//2 - clay
+//3 - obsidian
+//4 - geode
+while (s.Any()) {
+    var (ore, clay, obsidian, geode, 
+        orebots, claybots, obsidianbots, geodebots, time, goal) = s.Dequeue();
+
+    if(time == 24) {
+        maxGeodes = Math.Max(maxGeodes, geode);
+        continue;
+    }
+
+    int projected = geode + (24-time) * geodebots;
+    if(projected < lowerbound) continue;
+
+    lowerbound = projected;
+
+    time++;
+
+    int newOre = ore + orebots,
+        newClay = clay + claybots,
+        newObsidian = obsidian + obsidianbots,
+        newGeode = geode + geodebots;
+
+    if(goal == 1 && orebots < maxOre && ore >= oreCost) {
+        for(int i = 1; i <= 4; i++)
+            s.Enqueue((newOre-oreCost, newClay, newObsidian, newGeode, orebots+1, claybots, obsidianbots, geodebots, time, i));
+    }
+    else if(goal == 2 && claybots < maxClay && ore >= clayCost) {
+        for(int i = 1; i <= 4; i++)
+            s.Enqueue((newOre-clayCost, newClay, newObsidian, newGeode, orebots, claybots+1, obsidianbots, geodebots, time, i));
+    }
+    else if(goal == 3 && obsidianbots < maxObsidian && ore >= obsidianCost.Item1 && clay >= obsidianCost.Item2) {
+        for(int i = 1; i <= 4; i++)
+            s.Enqueue((newOre-obsidianCost.Item1, newClay-obsidianCost.Item2, newObsidian, newGeode, orebots, claybots, obsidianbots+1, geodebots, time, i));
+    }
+    else if(goal == 4 && ore >= geodeCost.Item1 && obsidian >= geodeCost.Item2) {
+        for(int i = 1; i <= 4; i++)
+            s.Enqueue((newOre-geodeCost.Item1, newClay, newObsidian-geodeCost.Item2, newGeode, orebots, claybots, obsidianbots, geodebots+1, time, i));
+    }
+    else s.Enqueue((newOre, newClay, newObsidian, newGeode, 
+                orebots, claybots, obsidianbots, geodebots, time, goal));
+}
+maxGeodes.F();
+sum += maxGeodes * n;
+});
+sum
+
+#!csharp
+
+int sum = 0;
+
+input.Split("\n").Take(3).Select(blueprint => {
+var g = blueprint.Ints();
+var n = g[0];
+var oreCost = g[1];
+var clayCost = g[2];
+var obsidianCost = (g[3], g[4]);
+var geodeCost = (g[5], g[6]);
+
+var maxOre = new[]{clayCost, obsidianCost.Item1, geodeCost.Item1}.Max();
+var maxClay = obsidianCost.Item2;
+var maxObsidian = geodeCost.Item2;
+
+int maxGeodes = 0;
+Queue<(int, int, int, int, int, int, int, int, int, int)> s = new();
+int lowerbound = 0;
+for(int i = 1; i <= 4; i++)
+    s.Enqueue((0,0,0,0,1,0,0,0,0,i));
+
+//0 - undecided
+//1 - ore
+//2 - clay
+//3 - obsidian
+//4 - geode
+while (s.Any()) {
+    var (ore, clay, obsidian, geode, 
+        orebots, claybots, obsidianbots, geodebots, time, goal) = s.Dequeue();
+
+    if(time == 32) {
+        maxGeodes = Math.Max(maxGeodes, geode);
+        continue;
+    }
+
+    int projected = geode + (32-time) * geodebots * 2;
+    
+    if(projected < lowerbound) continue;
+    lowerbound = geode + (32-time) * geodebots;
+
+    time++;
+
+    int newOre = ore + orebots,
+        newClay = clay + claybots,
+        newObsidian = obsidian + obsidianbots,
+        newGeode = geode + geodebots;
+
+    if(goal == 1 && orebots < maxOre && ore >= oreCost) {
+        for(int i = 1; i <= 4; i++)
+            s.Enqueue((newOre-oreCost, newClay, newObsidian, newGeode, orebots+1, claybots, obsidianbots, geodebots, time, i));
+    }
+    else if(goal == 2 && claybots < maxClay && ore >= clayCost) {
+        for(int i = 1; i <= 4; i++)
+            s.Enqueue((newOre-clayCost, newClay, newObsidian, newGeode, orebots, claybots+1, obsidianbots, geodebots, time, i));
+    }
+    else if(goal == 3 && obsidianbots < maxObsidian && ore >= obsidianCost.Item1 && clay >= obsidianCost.Item2) {
+        for(int i = 1; i <= 4; i++)
+            s.Enqueue((newOre-obsidianCost.Item1, newClay-obsidianCost.Item2, newObsidian, newGeode, orebots, claybots, obsidianbots+1, geodebots, time, i));
+    }
+    else if(goal == 4 && ore >= geodeCost.Item1 && obsidian >= geodeCost.Item2) {
+        for(int i = 1; i <= 4; i++)
+            s.Enqueue((newOre-geodeCost.Item1, newClay, newObsidian-geodeCost.Item2, newGeode, orebots, claybots, obsidianbots, geodebots+1, time, i));
+    }
+    else s.Enqueue((newOre, newClay, newObsidian, newGeode, 
+                orebots, claybots, obsidianbots, geodebots, time, goal));
+}
+maxGeodes.F();
+return maxGeodes;
+}).Aggregate(1, (a,b) => a*b)
